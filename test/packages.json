@@ -1,0 +1,79 @@
+[
+  {
+    "name": "foo",
+    "version": "1.0.0",
+    "dependencies": {
+      "direct": "1.2.3",
+      "equal": "=1.2.3",
+      "hyphen": "1.2.3 - 2.3.4",
+      "xrange": "1.x",
+      "tilde": "~1.2.3",
+      "caret": "^1.2.3",
+      "gt": ">1.2.3",
+      "gte": ">=1.2.3",
+      "lt": "<1.2.3",
+      "lte": "<=1.2.3",
+      "all1": "",
+      "all2": "*",
+      "all3": "x",
+      "or-range": "~1.2 || ~1.4",
+      "@scope/scope": "1.2.3"
+    }
+  }, {
+    "name": "bar",
+    "version": "1.0.0",
+    "dependencies": {
+      "direct": "1.2.3",
+      "equal": "=1.2.3",
+      "hyphen": "1.2.3 - 2.3.4",
+      "xrange": "1.x",
+      "tilde": "~1.2.3",
+      "caret": "^1.2.3"
+    }
+  }, {
+    "name": "below-range",
+    "version": "1.0.0",
+    "dependencies": {
+      "direct": "0.2.3",
+      "equal": "=0.2.3",
+      "hyphen": "0.2.3 - 0.3.4",
+      "xrange": "0.x",
+      "tilde": "~0.2.3",
+      "caret": "^0.2.3"
+    }
+  }, {
+    "name": "above-range",
+    "version": "1.0.0",
+    "dependencies": {
+      "direct": "99.2.3",
+      "equal": "=99.2.3",
+      "hyphen": "99.2.3 - 99.3.4",
+      "xrange": "99.x",
+      "tilde": "~99.2.3",
+      "caret": "^99.2.3"
+    }
+  }, {
+    "name": "no-version-ranges",
+    "version": "1.0.0",
+    "dependencies": {
+      "url": "http://example.com/pkg.tar.gz",
+      "file": "file:./pkg.tar.gz",
+      "git1": "git://github.com/user/project.git#commit-ish",
+      "git2": "git+ssh://user@github.com:project.git#commit-ish",
+      "git3": "git+ssh://user@github.com/project.git#commit-ish",
+      "git4": "git+http://user@github.com/project.git#commit-ish",
+      "git5": "git+https://user@github.com/project.git#commit-ish",
+      "github1": "foo/bar",
+      "github2": "foo/bar#12345678",
+      "path": "./foo",
+      "latest": "latest"
+    }
+  }, {
+    "name": "no-dependencies1",
+    "version": "1.0.0",
+    "dependencies": {}
+  }, {
+    "name": "no-dependencies2",
+    "version": "1.0.0"
+  }
+]

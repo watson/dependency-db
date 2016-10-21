@@ -1,0 +1,42 @@
+{
+  "name": "semver-db",
+  "version": "0.0.0",
+  "description": "A database for querying which packages depend on a specific package within a specific range",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && node test/test.js"
+  },
+  "dependencies": {
+    "lexicographic-integer": "^1.1.0",
+    "pump": "^1.0.1",
+    "semver": "^5.3.0",
+    "stream-collector": "^1.0.1",
+    "through2": "^2.0.1"
+  },
+  "devDependencies": {
+    "after-all": "^2.0.2",
+    "memdb": "^1.3.1",
+    "standard": "^8.4.0",
+    "tape": "^4.6.2"
+  },
+  "keywords": [
+    "npm",
+    "module",
+    "modules",
+    "package",
+    "packages",
+    "dependency",
+    "dependencies",
+    "semver",
+    "db",
+    "database",
+    "query",
+    "range",
+    "within",
+    "level",
+    "levelup",
+    "leveldown"
+  ],
+  "author": "Thomas Watson Steen <w@tson.dk> (https://twitter.com/wa7son)",
+  "license": "MIT"
+}
