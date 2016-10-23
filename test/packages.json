@@ -69,6 +69,12 @@
       "latest": "latest"
     }
   }, {
+    "name": "weird-ranges",
+    "version": "1.0.0",
+    "dependencies": {
+      "mkdirp": "0.0.x >= 0.0.7"
+    }
+  }, {
     "name": "no-dependencies1",
     "version": "1.0.0",
     "dependencies": {}

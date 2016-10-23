@@ -19,16 +19,45 @@ Db.prototype.store = function (pkg, cb) {
   var id = pkg.name + '@' + pkg.version
 
   Object.keys(deps).forEach(function (name) {
+    var key = '!index!' + name + '!' + id
     var range = deps[name]
     try {
       var sets = semver.Range(range).set
     } catch (e) {
       return
     }
-    sets.forEach(function (set) {
-      var key = genkey(id, name, set)
-      batch.push({ type: 'put', key: key, value: id })
+    var value = []
+    sets.forEach(function (comparators) {
+      var set = [[], []]
+      value.push(set)
+
+      comparators.forEach(function (comparator) {
+        switch (comparator.operator) {
+          case undefined: // 'match all' operator
+            set[0].push(lexSemver({ major: 0, minor: 0, patch: 0 }))
+            break
+          case '': // equal operator
+            set[0].push(lexSemver(comparator.semver))
+            set[1].push(lexSemver({
+              major: comparator.semver.major,
+              minor: comparator.semver.minor,
+              patch: comparator.semver.patch + 1,
+            }))
+            break
+          case '>':
+          case '>=':
+            set[0].push(lexSemver(comparator.semver))
+            break
+          case '<':
+          case '<=':
+            set[1].push(lexSemver(comparator.semver))
+            break
+          default:
+            throw new Error('Unexpected operator: ' + String(comparator.operator))
+        }
+      })
     })
+    batch.push({ type: 'put', key: key, value: value, valueEncoding: 'json' })
   })
 
   batch.push({ type: 'put', key: '!pkg!' + id, value: pkg, valueEncoding: 'json' })
@@ -42,7 +71,8 @@ Db.prototype.query = function (name, range, cb) {
   var wildcard = range.range === '' // both '*', 'x' and '' will be compiled to ''
   var stream = this._db.createReadStream({
     gt: '!index!' + name + '!',
-    lt: '!index!' + name + '!\xff'
+    lt: '!index!' + name + '!\xff',
+    valueEncoding: 'json'
   })
 
   if (range.set.length !== 1) return cb(new Error('OR-range queries not supported'))
@@ -55,14 +85,9 @@ Db.prototype.query = function (name, range, cb) {
 
   var self = this
   var filter = through.obj(function (data, enc, cb) {
-    if (!wildcard) {
-      var parts = data.key.split('!')
-      var lower = parts.slice(4, 7).join('!')
-      var upper = parts.slice(7).join('!')
-    }
-
-    if (wildcard || match(lower, upper, lquery, uquery)) {
-      self._db.get('!pkg!' + data.value, { valueEncoding: 'json' }, cb)
+    if (wildcard || match(data.value, lquery, uquery)) {
+      var id = data.key.substr(data.key.lastIndexOf('!') + 1)
+      self._db.get('!pkg!' + id, { valueEncoding: 'json' }, cb)
     } else {
       cb()
     }
@@ -73,20 +98,24 @@ Db.prototype.query = function (name, range, cb) {
   return collect(filter, cb)
 }
 
-function match (lower, upper, lquery, uquery) {
-  return (lquery >= lower && lquery < upper) || // lquery is inside
-         (uquery > lower && uquery <= upper) || // uquery is inside
-         (lquery <= lower && uquery >= upper)   // query spans
-}
+function match (range, lquery, uquery) {
+  return range.some(function (range) {
+    var lower = range[0]
+    var upper = range[1]
 
-// pkg: name@version
-// dep: name
-// comparators: an array of semver.Comparator objects
-function genkey (pkg, dep, comparators) {
-  var norm = normalize(comparators)
-  var lower = norm[0] ? lexSemver(norm[0]) : '\x00'
-  var upper = norm[1] ? lexSemver(norm[1]) : '\xff'
-  return '!index!' + dep + '!' + pkg + '!' + lower + '!' + upper
+    if (lower.length === 0 && uquery <= '\x00') return false
+    if (upper.length === 0 && lquery >= '\xff') return false
+
+    var ok = lower.every(function (lower) {
+      return uquery > lower
+    })
+
+    if (!ok) return false
+
+    return upper.every(function (upper) {
+      return lquery < upper
+    })
+  })
 }
 
 function normalize (comparators) {

@@ -28,7 +28,7 @@ var next = afterAll(function (err) {
         test('\'' + range + '\' ' + group.description, function (t) {
           db.query(target.name, range, function (err, results) {
             t.error(err)
-            t.deepEqual(results.sort(byName), matches)
+            t.deepEqual(results && results.sort(byName), matches)
             t.end()
           })
         })
