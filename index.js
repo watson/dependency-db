@@ -41,7 +41,7 @@ Db.prototype.store = function (pkg, cb) {
             set[1].push(lexSemver({
               major: comparator.semver.major,
               minor: comparator.semver.minor,
-              patch: comparator.semver.patch + 1,
+              patch: comparator.semver.patch + 1
             }))
             break
           case '>':
