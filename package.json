@@ -1,5 +1,5 @@
 {
-  "name": "semver-db",
+  "name": "dependency-db",
   "version": "0.0.0",
   "description": "A database for querying which packages depend on a specific package within a specific range",
   "main": "index.js",
