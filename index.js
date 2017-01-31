@@ -75,7 +75,7 @@ Db.prototype.query = function (name, range, cb) {
     valueEncoding: 'json'
   })
 
-  if (range.set.length !== 1) return cb(new Error('OR-range queries not supported'))
+  if (range.set.length !== 1) throw new Error('OR-range queries not supported')
 
   if (!wildcard) {
     var norm = normalize(range.set[0])
