@@ -63,13 +63,23 @@ The `callback` will be called with an optional error object as the first
 arguement when the package have been processed and stored correctly in
 the database.
 
-### `db.query(name, range, callback)`
+### `var stream = db.query(name, range[, callback])`
 
 Query the database for packages that depend on `name` within the given
 `range`.
 
-The `callback` will be called with an optional error object as the first
-arguement and an array of packages that match the query as the second.
+If provided, the `callback` will be called with an optional error object
+as the first arguement and an array of packages that match the query as
+the second.
+
+Alternatively you can use the returned object-stream to stream the
+results:
+
+```js
+db.query('roundround', '*').on('data', function (result) {
+  console.log(result)
+})
+```
 
 **Warning:** OR-queries are not supported. This means that the `range`
 argument must not contain a double pipe operator (`||`). If an OR-range
