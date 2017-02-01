@@ -71,6 +71,10 @@ Query the database for packages that depend on `name` within the given
 The `callback` will be called with an optional error object as the first
 arguement and an array of packages that match the query as the second.
 
+**Warning:** OR-queries are not supported. This means that the `range`
+argument must not contain a double pipe operator (`||`). If an OR-range
+is given an error is thrown.
+
 ## License
 
 MIT
