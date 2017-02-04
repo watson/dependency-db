@@ -1,6 +1,6 @@
 {
   "name": "dependency-db",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "A database for querying which packages depend on a specific package within a specific range",
   "main": "index.js",
   "scripts": {
@@ -40,7 +40,7 @@
   "author": "Thomas Watson Steen <w@tson.dk> (https://twitter.com/wa7son)",
   "license": "MIT",
   "coordinates": [
-    55.77759481554729,
-    12.590040280950916
+    55.77756448166343,
+    12.589743227508507
   ]
 }
