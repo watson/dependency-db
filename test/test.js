@@ -35,6 +35,16 @@ var next = afterAll(function (err) {
       })
     })
   })
+
+  test('devDependency', function (t) {
+    db.query('dev', '*', {devDependencies: true}, function (err, results) {
+      t.error(err)
+      t.equal(results.length, 1)
+      t.equal(results[0].name, 'foo')
+      t.deepEqual(results[0].devDependencies, {dev: '1.2.3'})
+      t.end()
+    })
+  })
 })
 
 packages.forEach(function (pkg) {

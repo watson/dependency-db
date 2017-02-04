@@ -18,6 +18,9 @@
       "all3": "x",
       "or-range": "~1.2 || ~1.4",
       "@scope/scope": "1.2.3"
+    },
+    "devDependencies": {
+      "dev": "1.2.3"
     }
   }, {
     "name": "bar",

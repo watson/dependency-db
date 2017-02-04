@@ -72,13 +72,21 @@ function batchDependencies (deps, keyprefix, id) {
   return batch
 }
 
-Db.prototype.query = function (name, range, cb) {
+Db.prototype.query = function (name, range, opts, cb) {
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  } else if (!opts) {
+    opts = {}
+  }
+
   range = semver.Range(range)
 
+  var keyprefix = opts.devDependencies ? '!index!dev!' : '!index!dep!'
   var wildcard = range.range === '' // both '*', 'x' and '' will be compiled to ''
   var stream = this._db.createReadStream({
-    gt: '!index!dep!' + name + '!',
-    lt: '!index!dep!' + name + '!\xff',
+    gt: keyprefix + name + '!',
+    lt: keyprefix + name + '!\xff',
     valueEncoding: 'json'
   })
 

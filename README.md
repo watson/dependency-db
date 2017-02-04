@@ -63,10 +63,15 @@ The `callback` will be called with an optional error object as the first
 arguement when the package have been processed and stored correctly in
 the database.
 
-### `var stream = db.query(name, range[, callback])`
+### `var stream = db.query(name, range[, options][, callback])`
 
 Query the database for packages that depend on `name` within the given
 `range`.
+
+The optional `options` argument can contain the following properties:
+
+- `devDependencies` - look up dev-dependencies instead of dependencies
+  (default: `false`)
 
 If provided, the `callback` will be called with an optional error object
 as the first arguement and an array of packages that match the query as
