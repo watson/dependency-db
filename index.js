@@ -14,12 +14,21 @@ function Db (db) {
 }
 
 Db.prototype.store = function (pkg, cb) {
-  var batch = []
-  var deps = pkg.dependencies || {}
   var id = pkg.name + '@' + pkg.version
 
+  var batch = batchDependencies(pkg.dependencies, '!index!dep', id)
+    .concat(batchDependencies(pkg.devDependencies, '!index!dev', id))
+    .concat({ type: 'put', key: '!pkg!' + id, value: pkg, valueEncoding: 'json' })
+
+  this._db.batch(batch, cb)
+}
+
+function batchDependencies (deps, keyprefix, id) {
+  deps = deps || {}
+  var batch = []
+
   Object.keys(deps).forEach(function (name) {
-    var key = '!index!' + name + '!' + id
+    var key = keyprefix + '!' + name + '!' + id
     var range = deps[name]
     try {
       var sets = semver.Range(range).set
@@ -60,9 +69,7 @@ Db.prototype.store = function (pkg, cb) {
     batch.push({ type: 'put', key: key, value: value, valueEncoding: 'json' })
   })
 
-  batch.push({ type: 'put', key: '!pkg!' + id, value: pkg, valueEncoding: 'json' })
-
-  this._db.batch(batch, cb)
+  return batch
 }
 
 Db.prototype.query = function (name, range, cb) {
@@ -70,8 +77,8 @@ Db.prototype.query = function (name, range, cb) {
 
   var wildcard = range.range === '' // both '*', 'x' and '' will be compiled to ''
   var stream = this._db.createReadStream({
-    gt: '!index!' + name + '!',
-    lt: '!index!' + name + '!\xff',
+    gt: '!index!dep!' + name + '!',
+    lt: '!index!dep!' + name + '!\xff',
     valueEncoding: 'json'
   })
 
