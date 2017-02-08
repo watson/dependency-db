@@ -28,7 +28,7 @@ function batchDependencies (deps, keyprefix, id) {
   var batch = []
 
   Object.keys(deps).forEach(function (name) {
-    var key = keyprefix + '!' + name + '!' + id
+    var key = keyprefix + '!' + name + '!' + id // example: !index!dep!request!zulip@0.1.0
     var range = deps[name]
     try {
       var sets = semver.Range(range).set
@@ -101,7 +101,8 @@ Db.prototype.query = function (name, range, opts, cb) {
   var self = this
   var filter = through.obj(function (data, enc, cb) {
     if (wildcard || match(data.value, lquery, uquery)) {
-      var id = data.key.substr(data.key.lastIndexOf('!') + 1)
+      // key example: !index!dep!request!zulip@0.1.0
+      var id = data.key.substr(data.key.lastIndexOf('!') + 1) // id = 'zulip@0.1.0'
       self._db.get('!pkg!' + id, { valueEncoding: 'json' }, cb)
     } else {
       cb()
