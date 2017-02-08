@@ -14,7 +14,7 @@ function Db (db) {
 }
 
 Db.prototype.store = function (pkg, cb) {
-  var id = pkg.name + '@' + pkg.version
+  var id = escape(pkg.name) + '@' + pkg.version
 
   var batch = batchDependencies(pkg.dependencies, '!index!dep', id)
     .concat(batchDependencies(pkg.devDependencies, '!index!dev', id))
@@ -28,6 +28,7 @@ function batchDependencies (deps, keyprefix, id) {
   var batch = []
 
   Object.keys(deps).forEach(function (name) {
+    name = escape(name)
     var key = keyprefix + '!' + name + '!' + id // example: !index!dep!request!zulip@0.1.0
     var range = deps[name]
     try {
@@ -80,6 +81,7 @@ Db.prototype.query = function (name, range, opts, cb) {
     opts = {}
   }
 
+  name = escape(name)
   range = semver.Range(range)
 
   var keyprefix = opts.devDependencies ? '!index!dev!' : '!index!dep!'
