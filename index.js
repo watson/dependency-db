@@ -28,9 +28,9 @@ function batchDependencies (deps, keyprefix, id) {
   var batch = []
 
   Object.keys(deps).forEach(function (dependency) {
-    dependency = escape(dependency)
     var key = keyprefix + '!' + dependency + '!' + id // example: !index!dep!request!zulip@0.1.0
     var range = deps[dependency]
+    dependency = escape(dependency)
     try {
       var sets = semver.Range(range).set
     } catch (e) {
