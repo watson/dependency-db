@@ -27,10 +27,10 @@ function batchDependencies (deps, keyprefix, id) {
   deps = deps || {}
   var batch = []
 
-  Object.keys(deps).forEach(function (name) {
-    name = escape(name)
-    var key = keyprefix + '!' + name + '!' + id // example: !index!dep!request!zulip@0.1.0
-    var range = deps[name]
+  Object.keys(deps).forEach(function (dependency) {
+    dependency = escape(dependency)
+    var key = keyprefix + '!' + dependency + '!' + id // example: !index!dep!request!zulip@0.1.0
+    var range = deps[dependency]
     try {
       var sets = semver.Range(range).set
     } catch (e) {
