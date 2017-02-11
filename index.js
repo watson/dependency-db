@@ -183,9 +183,9 @@ Db.prototype.query = function (name, range, opts, cb) {
         // if not, lazy clean up of out-of-date index and skip this result
         self._lock(function (release) {
           // check that the latest version haven't been updated since the previous get
-          self._db.get('!latest-version!' + dependant, function (err, latest) {
+          self._db.get('!latest-version!' + dependant, function (err, version) {
             if (err) done(err)
-            else if (latest === pkg.version) self._db.del(data.key, done)
+            else if (version === pkg.version) self._db.del(data.key, done)
             else done()
           })
 
