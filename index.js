@@ -9,6 +9,16 @@ var lru = require('hashlru')(1000)
 
 module.exports = Db
 
+// Database Schema:
+//
+// !pkg!<module-name>@<version>                  - package.json of specific version
+// !pkg-latest!<module-name>                     - package.json of latest version
+// !latest-version!<module-name>                 - version number of latest version of module
+// !index!dev!<dependency>!<dependant>@<version> - dependency range for specific version dependency
+// !index!dep!<dependency>!<dependant>@<version> - dependency range for specific version devDependency
+// !index-latest!dev!<dependency>!<dependant>    - dependency range for latest version dependency
+// !index-latest!dep!<dependency>!<dependant>    - dependency range for latest version devDependency
+
 function Db (db) {
   if (!(this instanceof Db)) return new Db(db)
   this._db = db
