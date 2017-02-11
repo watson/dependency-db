@@ -12,6 +12,8 @@ within a specific range.
 npm install dependency-db --save
 ```
 
+When upgrading from version 4, remember to purge the LevelDB index.
+
 ## Usage
 
 ```js
