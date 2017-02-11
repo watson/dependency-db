@@ -34,13 +34,14 @@ Db.prototype.store = function (pkg, cb) {
 
     var batch = batchDependencies(pkg, pkg.dependencies, 'dep', isLatest)
       .concat(batchDependencies(pkg, pkg.devDependencies, 'dev', isLatest))
-      .concat({type: 'put', key: '!pkg!' + dependant + '@' + pkg.version, value: pkg, valueEncoding: 'json'})
+
+    batch.push({type: 'put', key: '!pkg!' + dependant + '@' + pkg.version, value: pkg, valueEncoding: 'json'})
 
     if (isLatest) {
-      batch = batch.concat([
+      batch.push(
         {type: 'put', key: '!pkg-latest!' + dependant, value: pkg, valueEncoding: 'json'},
         {type: 'put', key: '!latest-version!' + dependant, value: pkg.version}
-      ])
+      )
       lru.set(pkg.name, pkg.version)
     }
 
