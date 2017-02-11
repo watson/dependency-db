@@ -46,20 +46,20 @@ var next = afterAll(function (err) {
     })
   })
 
-  test('latest, not latest', function (t) {
-    db.query('old-dependency', '*', {latest: false}, function (err, results) {
+  test('query all', function (t) {
+    db.query('old-dependency', '*', {all: true}, function (err, results) {
       t.error(err)
       t.deepEqual(results, [{dependencies: {'old-dependency': '^1.0.0'}, name: 'latest', version: '1.0.0'}])
       t.end()
     })
   })
 
-  test('latest, latest', function (t) {
+  test('query most recent', function (t) {
     // validate that outdated dependency is present before query
     db._db.get('!index-latest!dep!old-dependency!latest', function (err, value) {
       t.error(err)
 
-      db.query('old-dependency', '*', {latest: true}, function (err, results) {
+      db.query('old-dependency', '*', {all: false}, function (err, results) {
         t.error(err)
         t.deepEqual(results, [])
 

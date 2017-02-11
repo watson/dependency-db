@@ -72,10 +72,10 @@ Query the database for packages that depend on `name` within the given
 
 The optional `options` argument can contain the following properties:
 
-- `latest` - only return dependants that depend upon the `name` /
-  `range` in its latest version (default: `true`)
 - `devDependencies` - look up dev-dependencies instead of dependencies
   (default: `false`)
+- `all` - return all versions of all packages that matches the queried
+  dependency
 
 If provided, the `callback` will be called with an optional error object
 as the first arguement and an array of packages that match the query as
