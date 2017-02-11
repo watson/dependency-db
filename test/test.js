@@ -45,6 +45,32 @@ var next = afterAll(function (err) {
       t.end()
     })
   })
+
+  test('latest, not latest', function (t) {
+    db.query('old-dependency', '*', {latest: false}, function (err, results) {
+      t.error(err)
+      t.deepEqual(results, [{dependencies: {'old-dependency': '^1.0.0'}, name: 'latest', version: '1.0.0'}])
+      t.end()
+    })
+  })
+
+  test('latest, latest', function (t) {
+    // validate that outdated dependency is present before query
+    db._db.get('!index-latest!dep!old-dependency!latest', function (err, value) {
+      t.error(err)
+
+      db.query('old-dependency', '*', {latest: true}, function (err, results) {
+        t.error(err)
+        t.deepEqual(results, [])
+
+        // validate that outdated dependency is pruned after query
+        db._db.get('!index-latest!dep!old-dependency!latest', function (err, value) {
+          t.ok(err.notFound)
+          t.end()
+        })
+      })
+    })
+  })
 })
 
 packages.forEach(function (pkg) {

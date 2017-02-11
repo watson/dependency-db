@@ -84,5 +84,17 @@
   }, {
     "name": "no-dependencies2",
     "version": "1.0.0"
+  }, {
+    "name": "latest",
+    "version": "1.0.0",
+    "dependencies": {
+      "old-dependency": "^1.0.0"
+    }
+  }, {
+    "name": "latest",
+    "version": "2.0.0",
+    "dependencies": {
+      "new-dependency": "^1.0.0"
+    }
   }
 ]

@@ -5,6 +5,7 @@ var lexi = require('lexicographic-integer')
 var through = require('through2')
 var pump = require('pump')
 var collect = require('stream-collector')
+var lru = require('hashlru')(1000)
 
 module.exports = Db
 
@@ -14,23 +15,51 @@ function Db (db) {
 }
 
 Db.prototype.store = function (pkg, cb) {
-  var id = escape(pkg.name) + '@' + pkg.version
+  var self = this
 
-  var batch = batchDependencies(pkg.dependencies, '!index!dep', id)
-    .concat(batchDependencies(pkg.devDependencies, '!index!dev', id))
-    .concat({ type: 'put', key: '!pkg!' + id, value: pkg, valueEncoding: 'json' })
+  this._getLatestVersion(pkg.name, function (err, latest) {
+    if (err) return cb(err)
+    var isLatest = latest ? semver.gt(pkg.version, latest) : true
+    var dependant = escape(pkg.name)
 
-  this._db.batch(batch, cb)
+    var batch = batchDependencies(pkg, pkg.dependencies, 'dep', isLatest)
+      .concat(batchDependencies(pkg, pkg.devDependencies, 'dev', isLatest))
+      .concat({type: 'put', key: '!pkg!' + dependant + '@' + pkg.version, value: pkg, valueEncoding: 'json'})
+
+    if (isLatest) {
+      batch = batch.concat([
+        {type: 'put', key: '!pkg-latest!' + dependant, value: pkg, valueEncoding: 'json'},
+        {type: 'put', key: '!latest-version!' + dependant, value: pkg.version}
+      ])
+      lru.set(pkg.name, pkg.version)
+    }
+
+    self._db.batch(batch, cb)
+  })
 }
 
-function batchDependencies (deps, keyprefix, id) {
+Db.prototype._getLatestVersion = function (name, cb) {
+  var latest = lru.get(name)
+  if (latest) {
+    process.nextTick(function () {
+      cb(null, latest)
+    })
+  } else {
+    var key = '!latest-version!' + escape(name)
+    this._db.get(key, function (err, version) {
+      if (err && !err.notFound) cb(err)
+      else cb(null, version)
+    })
+  }
+}
+
+function batchDependencies (pkg, deps, deptype, isLatest) {
   deps = deps || {}
+  var dependant = escape(pkg.name)
   var batch = []
 
   Object.keys(deps).forEach(function (dependency) {
-    var key = keyprefix + '!' + dependency + '!' + id // example: !index!dep!request!zulip@0.1.0
     var range = deps[dependency]
-    dependency = escape(dependency)
     try {
       var sets = semver.Range(range).set
     } catch (e) {
@@ -67,7 +96,16 @@ function batchDependencies (deps, keyprefix, id) {
         }
       })
     })
-    batch.push({ type: 'put', key: key, value: value, valueEncoding: 'json' })
+
+    dependency = escape(dependency)
+
+    var key = '!index!' + deptype + '!' + dependency + '!' + dependant + '@' + pkg.version // example: !index!dep!request!zulip@0.1.0
+    batch.push({type: 'put', key: key, value: value, valueEncoding: 'json'})
+
+    if (isLatest) {
+      var latestKey = '!index-latest!' + deptype + '!' + dependency + '!' + dependant // example: !index-latest!dep!request!zulip
+      batch.push({type: 'put', key: latestKey, value: {version: pkg.version, sets: value}, valueEncoding: 'json'})
+    }
   })
 
   return batch
@@ -84,7 +122,9 @@ Db.prototype.query = function (name, range, opts, cb) {
   name = escape(name)
   range = semver.Range(range)
 
-  var keyprefix = opts.devDependencies ? '!index!dev!' : '!index!dep!'
+  var keyprefix = opts.latest ? '!index-latest!' : '!index!'
+  keyprefix += opts.devDependencies ? 'dev!' : 'dep!'
+
   var wildcard = range.range === '' // both '*', 'x' and '' will be compiled to ''
   var stream = this._db.createReadStream({
     gt: keyprefix + name + '!',
@@ -102,10 +142,20 @@ Db.prototype.query = function (name, range, opts, cb) {
 
   var self = this
   var filter = through.obj(function (data, enc, cb) {
-    if (wildcard || match(data.value, lquery, uquery)) {
-      // key example: !index!dep!request!zulip@0.1.0
-      var id = data.key.substr(data.key.lastIndexOf('!') + 1) // id = 'zulip@0.1.0'
-      self._db.get('!pkg!' + id, { valueEncoding: 'json' }, cb)
+    var sets = opts.latest ? data.value.sets : data.value
+    if (wildcard || match(sets, lquery, uquery)) {
+      // get dependant from key:
+      //   !index!dep!request!zulip@0.1.0 => zulip@0.1.0
+      //   !index!dep!request!zulip       => zulip (if latest only)
+      var dependant = data.key.substr(data.key.lastIndexOf('!') + 1)
+      var key = (opts.latest ? '!pkg-latest!' : '!pkg!') + dependant
+      self._db.get(key, { valueEncoding: 'json' }, function (err, pkg) {
+        if (err) return cb(err)
+        if (!opts.latest) return cb(null, pkg)
+        var deps = opts.devDependencies ? pkg.devDependencies : pkg.dependencies
+        if (deps && name in deps) return cb(null, pkg)
+        self._db.del(data.key, cb) // clean up out of date index
+      })
     } else {
       cb()
     }
