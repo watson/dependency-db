@@ -83,7 +83,7 @@ function batchDependencies (pkg, deps, deptype, isLatest) {
       comparators.forEach(function (comparator) {
         switch (comparator.operator) {
           case undefined: // 'match all' operator
-            set[0].push(lexSemver({ major: 0, minor: 0, patch: 0 }))
+            set[0].push(lexSemver({major: 0, minor: 0, patch: 0}))
             break
           case '': // equal operator
             set[0].push(lexSemver(comparator.semver))
@@ -159,7 +159,7 @@ Db.prototype.query = function (name, range, opts, cb) {
       //   !index!dep!request!zulip       => zulip (if latest only)
       var dependant = data.key.substr(data.key.lastIndexOf('!') + 1)
       var key = (opts.latest ? '!pkg-latest!' : '!pkg!') + dependant
-      self._db.get(key, { valueEncoding: 'json' }, function (err, pkg) {
+      self._db.get(key, {valueEncoding: 'json'}, function (err, pkg) {
         if (err) return cb(err)
         if (!opts.latest) return cb(null, pkg)
         var deps = opts.devDependencies ? pkg.devDependencies : pkg.dependencies
@@ -218,10 +218,10 @@ function normalize (comparators) {
           }
         ]
       case '<':
-        return [{ major: 0, minor: 0, patch: 0 }, lower.semver]
+        return [{major: 0, minor: 0, patch: 0}, lower.semver]
       case '<=':
         return [
-          { major: 0, minor: 0, patch: 0 },
+          {major: 0, minor: 0, patch: 0},
           {
             major: lower.semver.major,
             minor: lower.semver.minor,
