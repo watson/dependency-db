@@ -138,8 +138,9 @@ Db.prototype.query = function (name, range, opts, cb) {
 
   name = escape(name)
   range = semver.Range(range)
+  var queryLatest = opts.latest !== false
 
-  var keyprefix = opts.latest ? '!index-latest!' : '!index!'
+  var keyprefix = queryLatest ? '!index-latest!' : '!index!'
   keyprefix += opts.devDependencies ? 'dev!' : 'dep!'
 
   var wildcard = range.range === '' // both '*', 'x' and '' will be compiled to ''
@@ -159,20 +160,20 @@ Db.prototype.query = function (name, range, opts, cb) {
 
   var self = this
   var filter = through.obj(function (data, enc, cb) {
-    var sets = opts.latest ? data.value.sets : data.value
+    var sets = queryLatest ? data.value.sets : data.value
     if (wildcard || match(sets, lquery, uquery)) {
       // extract dependant from key:
       //   !index!dep!request!zulip@0.1.0 => zulip@0.1.0
       //   !index!dep!request!zulip       => zulip (if latest only)
       var dependant = data.key.substr(data.key.lastIndexOf('!') + 1)
-      var key = (opts.latest ? '!pkg-latest!' : '!pkg!') + dependant
+      var key = (queryLatest ? '!pkg-latest!' : '!pkg!') + dependant
 
       // fetch package.json from database
       self._db.get(key, {valueEncoding: 'json'}, function (err, pkg) {
         if (err) return cb(err)
 
         // if we don't care whether or not this is the latest version, just return it
-        if (!opts.latest) return cb(null, pkg)
+        if (!queryLatest) return cb(null, pkg)
 
         // if the latest package still depend on the module, return it (this
         // will be the case 99% of the time)
