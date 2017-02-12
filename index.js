@@ -160,44 +160,42 @@ Db.prototype.query = function (name, range, opts, cb) {
 
   var self = this
   var filter = through.obj(function (data, enc, cb) {
+    // skip result if not a match
     var sets = opts.all ? data.value : data.value.sets
-    if (wildcard || match(sets, lquery, uquery)) {
-      // extract dependent from key:
-      //   !index!dep!request!zulip@0.1.0 => zulip@0.1.0
-      //   !index!dep!request!zulip       => zulip (if latest only)
-      var dependent = data.key.substr(data.key.lastIndexOf('!') + 1)
-      var key = (opts.all ? '!pkg!' : '!pkg-latest!') + dependent
+    if (!wildcard && !match(sets, lquery, uquery)) return cb()
 
-      // fetch package.json from database
-      self._db.get(key, {valueEncoding: 'json'}, function (err, pkg) {
-        if (err) return cb(err)
+    // extract dependent from key:
+    //   !index!dep!request!zulip@0.1.0 => zulip@0.1.0
+    //   !index!dep!request!zulip       => zulip (if latest only)
+    var dependent = data.key.substr(data.key.lastIndexOf('!') + 1)
+    var key = (opts.all ? '!pkg!' : '!pkg-latest!') + dependent
 
-        // if we don't care whether or not this is the latest version, just return it
-        if (opts.all) return cb(null, pkg)
+    // fetch package.json from database
+    self._db.get(key, {valueEncoding: 'json'}, function (err, pkg) {
+      if (err) return cb(err)
 
-        // if the latest package still depend on the module, return it (this
-        // will be the case 99% of the time)
-        var deps = opts.devDependencies ? pkg.devDependencies : pkg.dependencies
-        if (deps && name in deps) return cb(null, pkg)
+      // if we don't care whether or not this is the latest version, just return it
+      if (opts.all) return cb(null, pkg)
 
-        // if not, lazy clean up of out-of-date index and skip this result
-        self._lock(function (release) {
-          // check that the latest version haven't been updated since the previous get
-          self._db.get('!latest-version!' + dependent, function (err, version) {
-            if (err) done(err)
-            else if (version === pkg.version) self._db.del(data.key, done)
-            else done()
-          })
+      // if the latest package still depend on the module, return it (this
+      // will be the case 99% of the time)
+      var deps = opts.devDependencies ? pkg.devDependencies : pkg.dependencies
+      if (deps && name in deps) return cb(null, pkg)
 
-          function done (err) {
-            release()
-            cb(err)
-          }
+      // if not, lazy clean up of out-of-date index and skip this result
+      self._lock(function (release) {
+        // check that the latest version haven't been updated since the previous get
+        self._db.get('!latest-version!' + dependent, function (err, version) {
+          if (err || version !== pkg.version) return done(err)
+          self._db.del(data.key, done)
         })
+
+        function done (err) {
+          release()
+          cb(err)
+        }
       })
-    } else {
-      cb()
-    }
+    })
   })
 
   pump(stream, filter)
