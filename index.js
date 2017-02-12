@@ -16,10 +16,10 @@ module.exports = Db
 // !pkg!<module-name>@<version>                  - package.json of specific version
 // !pkg-latest!<module-name>                     - package.json of latest version
 // !latest-version!<module-name>                 - version number of latest version of module
-// !index!dev!<dependency>!<dependant>@<version> - dependency range for specific version dependency
-// !index!dep!<dependency>!<dependant>@<version> - dependency range for specific version devDependency
-// !index-latest!dev!<dependency>!<dependant>    - dependency range for latest version dependency
-// !index-latest!dep!<dependency>!<dependant>    - dependency range for latest version devDependency
+// !index!dev!<dependency>!<dependent>@<version> - dependency range for specific version dependency
+// !index!dep!<dependency>!<dependent>@<version> - dependency range for specific version devDependency
+// !index-latest!dev!<dependency>!<dependent>    - dependency range for latest version dependency
+// !index-latest!dep!<dependency>!<dependent>    - dependency range for latest version devDependency
 
 function Db (db) {
   if (!(this instanceof Db)) return new Db(db)
@@ -34,17 +34,17 @@ Db.prototype.store = function (pkg, cb) {
     self._getLatestVersion(pkg.name, function (err, latest) {
       if (err) return release(cb, err)
       var isLatest = latest ? semverGt(pkg.version, latest) : true
-      var dependant = escape(pkg.name)
+      var dependent = escape(pkg.name)
 
       var batch = batchDependencies(pkg, pkg.dependencies, 'dep', isLatest)
         .concat(batchDependencies(pkg, pkg.devDependencies, 'dev', isLatest))
 
-      batch.push({type: 'put', key: '!pkg!' + dependant + '@' + pkg.version, value: pkg, valueEncoding: 'json'})
+      batch.push({type: 'put', key: '!pkg!' + dependent + '@' + pkg.version, value: pkg, valueEncoding: 'json'})
 
       if (isLatest) {
         batch.push(
-          {type: 'put', key: '!pkg-latest!' + dependant, value: pkg, valueEncoding: 'json'},
-          {type: 'put', key: '!latest-version!' + dependant, value: pkg.version}
+          {type: 'put', key: '!pkg-latest!' + dependent, value: pkg, valueEncoding: 'json'},
+          {type: 'put', key: '!latest-version!' + dependent, value: pkg.version}
         )
         lru.set(pkg.name, pkg.version)
       }
@@ -73,7 +73,7 @@ Db.prototype._getLatestVersion = function (name, cb) {
 
 function batchDependencies (pkg, deps, deptype, isLatest) {
   deps = deps || {}
-  var dependant = escape(pkg.name)
+  var dependent = escape(pkg.name)
   var batch = []
 
   Object.keys(deps).forEach(function (dependency) {
@@ -117,11 +117,11 @@ function batchDependencies (pkg, deps, deptype, isLatest) {
 
     dependency = escape(dependency)
 
-    var key = '!index!' + deptype + '!' + dependency + '!' + dependant + '@' + pkg.version // example: !index!dep!request!zulip@0.1.0
+    var key = '!index!' + deptype + '!' + dependency + '!' + dependent + '@' + pkg.version // example: !index!dep!request!zulip@0.1.0
     batch.push({type: 'put', key: key, value: value, valueEncoding: 'json'})
 
     if (isLatest) {
-      var latestKey = '!index-latest!' + deptype + '!' + dependency + '!' + dependant // example: !index-latest!dep!request!zulip
+      var latestKey = '!index-latest!' + deptype + '!' + dependency + '!' + dependent // example: !index-latest!dep!request!zulip
       batch.push({type: 'put', key: latestKey, value: {version: pkg.version, sets: value}, valueEncoding: 'json'})
     }
   })
@@ -162,11 +162,11 @@ Db.prototype.query = function (name, range, opts, cb) {
   var filter = through.obj(function (data, enc, cb) {
     var sets = opts.all ? data.value : data.value.sets
     if (wildcard || match(sets, lquery, uquery)) {
-      // extract dependant from key:
+      // extract dependent from key:
       //   !index!dep!request!zulip@0.1.0 => zulip@0.1.0
       //   !index!dep!request!zulip       => zulip (if latest only)
-      var dependant = data.key.substr(data.key.lastIndexOf('!') + 1)
-      var key = (opts.all ? '!pkg!' : '!pkg-latest!') + dependant
+      var dependent = data.key.substr(data.key.lastIndexOf('!') + 1)
+      var key = (opts.all ? '!pkg!' : '!pkg-latest!') + dependent
 
       // fetch package.json from database
       self._db.get(key, {valueEncoding: 'json'}, function (err, pkg) {
@@ -183,7 +183,7 @@ Db.prototype.query = function (name, range, opts, cb) {
         // if not, lazy clean up of out-of-date index and skip this result
         self._lock(function (release) {
           // check that the latest version haven't been updated since the previous get
-          self._db.get('!latest-version!' + dependant, function (err, version) {
+          self._db.get('!latest-version!' + dependent, function (err, version) {
             if (err) done(err)
             else if (version === pkg.version) self._db.del(data.key, done)
             else done()

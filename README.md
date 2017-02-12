@@ -37,7 +37,7 @@ db.store(pkg, function (err) {
   db.query('bar', '^2.0.0', function (err, pkgs) {
     if (err) throw err
 
-    console.log('Found %d dependant package releases:', pkgs.length)
+    console.log('Found %d dependent package releases:', pkgs.length)
 
     pkgs.forEach(function (pkg) {
       console.log('- %s@%s', pkg.name, pkg.version)
