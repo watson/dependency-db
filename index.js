@@ -1,6 +1,7 @@
 'use strict'
 
 var semver = require('semver')
+var cmp = require('semver-compare')
 var lexi = require('lexicographic-integer')
 var through = require('through2')
 var pump = require('pump')
@@ -32,7 +33,7 @@ Db.prototype.store = function (pkg, cb) {
   this._lock(function (release) {
     self._getLatestVersion(pkg.name, function (err, latest) {
       if (err) return release(cb, err)
-      var isLatest = latest ? semver.gt(pkg.version, latest) : true
+      var isLatest = latest ? semverGt(pkg.version, latest) : true
       var dependant = escape(pkg.name)
 
       var batch = batchDependencies(pkg, pkg.dependencies, 'dep', isLatest)
@@ -202,6 +203,11 @@ Db.prototype.query = function (name, range, opts, cb) {
   pump(stream, filter)
 
   return collect(filter, cb)
+}
+
+function semverGt (a, b) {
+  // semver.gt doesn't work with really big numbers
+  return cmp(a, b) === 1
 }
 
 function match (range, lquery, uquery) {
