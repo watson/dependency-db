@@ -1,6 +1,6 @@
 {
   "name": "dependency-db",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "A database for querying which packages depend on a specific package within a specific range",
   "main": "index.js",
   "scripts": {
@@ -44,6 +44,6 @@
   "license": "MIT",
   "coordinates": [
     55.68101670000001,
-    12.5643957
+    12.5643693
   ]
 }
