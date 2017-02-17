@@ -76,6 +76,9 @@ The optional `options` argument can contain the following properties:
   (default: `false`)
 - `all` - Return all versions of all packages that matches the queried
   dependency
+- `gt` - Used for pagination. Only return results greater than the given dependent (format: `dependent` or `dependent@version`)
+- `limit` - Used for pagination. Max number of results to return
+  (default: `-1`, no limit)
 
 If provided, the `callback` will be called with an optional error object
 as the first arguement and an array of packages that match the query as

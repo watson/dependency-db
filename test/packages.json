@@ -96,5 +96,35 @@
     "dependencies": {
       "new-dependency": "^1.0.0"
     }
+  }, {
+    "name": "pagination1",
+    "version": "1.0.0",
+    "dependencies": {
+      "pagination-dependency": "^1.0.0"
+    }
+  }, {
+    "name": "pagination2",
+    "version": "1.0.0",
+    "dependencies": {
+      "pagination-dependency": "^1.0.0"
+    }
+  }, {
+    "name": "pagination3",
+    "version": "1.0.0",
+    "dependencies": {
+      "pagination-dependency": "^1.0.0"
+    }
+  }, {
+    "name": "pagination4",
+    "version": "1.0.0",
+    "dependencies": {
+      "pagination-dependency": "^1.0.0"
+    }
+  }, {
+    "name": "pagination5",
+    "version": "1.0.0",
+    "dependencies": {
+      "pagination-dependency": "^1.0.0"
+    }
   }
 ]

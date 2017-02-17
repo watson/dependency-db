@@ -145,8 +145,9 @@ Db.prototype.query = function (name, range, opts, cb) {
 
   var wildcard = range.range === '' // both '*', 'x' and '' will be compiled to ''
   var stream = this._db.createReadStream({
-    gt: keyprefix + name + '!',
+    gt: keyprefix + name + '!' + (opts.gt || ''),
     lt: keyprefix + name + '!\xff',
+    limit: opts.limit || -1,
     valueEncoding: 'json'
   })
 

@@ -71,6 +71,40 @@ var next = afterAll(function (err) {
       })
     })
   })
+
+  test('pagination: limit', function (t) {
+    db.query('pagination-dependency', '*', function (err, r1) {
+      t.error(err)
+      t.equal(r1.length, 5)
+      db.query('pagination-dependency', '*', {limit: 3}, function (err, r2) {
+        t.error(err)
+        t.equal(r2.length, 3)
+        t.deepEqual(r1.slice(0, 3), r2)
+        t.end()
+      })
+    })
+  })
+
+  test('pagination: gt', function (t) {
+    db.query('pagination-dependency', '*', {limit: 2}, function (err, r1) {
+      t.error(err)
+      t.equal(r1.length, 2)
+      t.equal(r1[0].name, 'pagination1')
+      t.equal(r1[1].name, 'pagination2')
+      db.query('pagination-dependency', '*', {gt: r1[1].name, limit: 2}, function (err, r2) {
+        t.error(err)
+        t.equal(r2.length, 2)
+        t.equal(r2[0].name, 'pagination3')
+        t.equal(r2[1].name, 'pagination4')
+        db.query('pagination-dependency', '*', {gt: r2[1].name, limit: 2}, function (err, r3) {
+          t.error(err)
+          t.equal(r3.length, 1)
+          t.equal(r3[0].name, 'pagination5')
+          t.end()
+        })
+      })
+    })
+  })
 })
 
 packages.forEach(function (pkg) {
