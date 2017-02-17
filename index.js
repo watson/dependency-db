@@ -147,7 +147,7 @@ Db.prototype.query = function (name, range, opts, cb) {
   var stream = this._db.createReadStream({
     gt: keyprefix + name + '!' + (opts.gt || ''),
     lt: keyprefix + name + '!\xff',
-    limit: opts.limit || -1,
+    limit: parseInt(opts.limit || -1, 10),
     valueEncoding: 'json'
   })
 

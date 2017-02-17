@@ -85,6 +85,14 @@ var next = afterAll(function (err) {
     })
   })
 
+  test('pagination: limit, string', function (t) {
+    db.query('pagination-dependency', '*', {limit: '2'}, function (err, results) {
+      t.error(err)
+      t.equal(results.length, 2)
+      t.end()
+    })
+  })
+
   test('pagination: gt', function (t) {
     db.query('pagination-dependency', '*', {limit: 2}, function (err, r1) {
       t.error(err)
