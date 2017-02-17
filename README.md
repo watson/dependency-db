@@ -72,9 +72,9 @@ Query the database for packages that depend on `name` within the given
 
 The optional `options` argument can contain the following properties:
 
-- `devDependencies` - look up dev-dependencies instead of dependencies
+- `devDependencies` - Look up dev-dependencies instead of dependencies
   (default: `false`)
-- `all` - return all versions of all packages that matches the queried
+- `all` - Return all versions of all packages that matches the queried
   dependency
 
 If provided, the `callback` will be called with an optional error object
