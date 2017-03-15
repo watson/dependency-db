@@ -6,6 +6,10 @@
   "scripts": {
     "test": "standard && node test/test.js"
   },
+  "repository": { 
+    "type" : "git",
+    "url" : "https://github.com/watson/dependency-db.git"
+  },
   "dependencies": {
     "hashlru": "^1.0.6",
     "lexicographic-integer": "^1.1.0",
