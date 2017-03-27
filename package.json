@@ -11,14 +11,14 @@
     "url": "https://github.com/watson/dependency-db.git"
   },
   "dependencies": {
-    "hashlru": "^1.0.6",
+    "hashlru": "^2.0.0",
     "lexicographic-integer": "^1.1.0",
     "mutexify": "^1.1.0",
-    "pump": "^1.0.1",
+    "pump": "^1.0.2",
     "semver": "^5.3.0",
     "semver-compare": "^1.0.0",
     "stream-collector": "^1.0.1",
-    "through2": "^2.0.1"
+    "through2": "^2.0.3"
   },
   "devDependencies": {
     "after-all": "^2.0.2",
