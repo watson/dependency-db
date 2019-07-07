@@ -4,7 +4,9 @@
   "description": "A database for querying which packages depend on a specific package within a specific range",
   "main": "index.js",
   "scripts": {
-    "test": "standard && node test/test.js"
+    "test": "standard && node test/test.js",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -18,7 +20,8 @@
     "semver": "^5.3.0",
     "semver-compare": "^1.0.0",
     "stream-collector": "^1.0.1",
-    "through2": "^2.0.3"
+    "through2": "^2.0.3",
+    "snyk": "^1.192.3"
   },
   "devDependencies": {
     "after-all": "^2.0.2",
@@ -49,5 +52,6 @@
   "coordinates": [
     55.6811291,
     12.5645677
-  ]
+  ],
+  "snyk": true
 }
