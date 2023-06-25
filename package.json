@@ -15,7 +15,7 @@
     "lexicographic-integer": "^1.1.0",
     "mutexify": "^1.1.0",
     "pump": "^1.0.2",
-    "semver": "^5.3.0",
+    "semver": "^7.5.2",
     "semver-compare": "^1.0.0",
     "stream-collector": "^1.0.1",
     "through2": "^2.0.3"
